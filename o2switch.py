@@ -125,7 +125,7 @@ def get_client():
                        capture_output=True, text=True)
     if p.returncode:
         raise Error('Token absent du Trousseau : lance « o2switch configure ».')
-    expires = config.get('token_expires_at')
+    expires = int(config['token_expires_at']) if config.get('token_expires_at') else None
     if expires and expires - time.time() < 7 * 86400:
         days = int((expires - time.time()) // 86400)
         print('Attention : le token expire ' + ('dans ' + str(days) + ' jour(s)' if days >= 0 else 'déjà') +
@@ -165,7 +165,7 @@ def configure():
     APP_DIR.mkdir(parents=True, exist_ok=True)
     temp = CONFIG.with_name('config.' + str(os.getpid()) + '.json')
     save(temp, {'host': host, 'user': user, 'token_name': name or None,
-                'token_expires_at': match[0].get('expires_at') if match else None})
+                'token_expires_at': int(match[0]['expires_at']) if match and match[0].get('expires_at') else None})
     temp.replace(CONFIG)
     print('Token valide et enregistré dans le Trousseau (service ' + SERVICE + ').')
     if name and not match:
@@ -435,7 +435,7 @@ def cmd_whoami(client, args):
     keep = ('user', 'domain', 'contact_email', 'plan', 'disk_block_limit', 'created', 'last_modified')
     out({k: info.get(k) for k in keep if k in info} if isinstance(info, dict) else info)
     config = load_config()
-    expires = config.get('token_expires_at')
+    expires = int(config['token_expires_at']) if config.get('token_expires_at') else None
     print('Token : ' + (config.get('token_name') or 'nom inconnu') + ', expire ' +
           (time.strftime('%Y-%m-%d %H:%M', time.localtime(expires)) if expires else 'jamais ou inconnu'))
 
@@ -444,7 +444,8 @@ def cmd_token(client, args):
     if args.action == 'list':
         rows = client.call('Tokens', 'list')
         for t in rows:
-            exp = t.get('expires_at')
+            # cPanel renvoie parfois les timestamps en chaîne.
+            exp = int(t['expires_at']) if t.get('expires_at') else None
             print(t.get('name') + '  expire ' + (time.strftime('%Y-%m-%d', time.localtime(exp)) if exp else 'jamais') +
                   ('  lecture seule' if t.get('readonly') else ''))
         return
