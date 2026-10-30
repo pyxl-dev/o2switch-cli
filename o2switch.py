@@ -242,7 +242,11 @@ def owner(zone, name):
 
 
 def hostname(value):
-    return zone_name(value) + '.'
+    # Cible de CNAME/MX/SRV : les labels de service (_domainkey, _dmarc) sont permis.
+    value = value.rstrip('.').lower()
+    if len(value) > 253 or '.' not in value or any(not re.fullmatch(r'[a-z0-9_](?:[a-z0-9_-]{0,61}[a-z0-9])?', label) for label in value.split('.')):
+        raise Error('Nom d\'hôte invalide : ' + value)
+    return value + '.'
 
 
 def decode(value):

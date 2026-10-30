@@ -123,6 +123,9 @@ class DnsTests(unittest.TestCase):
             with self.assertRaises(m.Error):
                 m.record_data(rtype, value)
         self.assertEqual(m.record_data('TXT', 'a' * 300), ['a' * 255, 'a' * 45])
+        self.assertEqual(m.record_data('CNAME', 'dkim._domainkey.example.net'), ['dkim._domainkey.example.net.'])
+        with self.assertRaises(m.Error):
+            m.record_data('CNAME', 'bad..host')
         self.assertEqual(m.record_data('CAA', '0 issue "letsencrypt.org"'), ['0', 'issue', 'letsencrypt.org'])
 
 
