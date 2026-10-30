@@ -1,6 +1,6 @@
 # o2switch-cli
 
-CLI `o2switch` pour piloter le compte cPanel o2switch via l'API UAPI. Python 3.9+ et `dig`, aucune dépendance. Remplace et étend o2dns, mon ancien script qui ne gérait que les TXT et CNAME.
+CLI `o2switch` pour piloter le compte cPanel o2switch via l'API UAPI. Python 3.9+, `curl` et `dig`, aucune dépendance. Le transport passe par `curl` car le Python système (LibreSSL 2.8) ne gère pas TLS 1.3, exigé par o2switch. Remplace et étend o2dns, mon ancien script qui ne gérait que les TXT et CNAME.
 
 Lien installé : `~/.local/bin/o2switch` vers `o2switch.py`.
 

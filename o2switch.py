@@ -16,9 +16,7 @@ import shlex
 import subprocess
 import sys
 import time
-import urllib.error
 import urllib.parse
-import urllib.request
 
 ROOT = Path(__file__).resolve().parent
 INDEX = ROOT / 'api-index.json'
@@ -68,22 +66,28 @@ class Client:
 
     def call(self, module, function, params=None):
         # POST : les paramètres (mots de passe compris) ne finissent pas dans les logs d'URL.
-        body = urllib.parse.urlencode(params or {}).encode()
-        req = urllib.request.Request(self.base + module + '/' + function, data=body, method='POST',
-                                     headers={'Authorization': self.authorization})
-
-        # Never forward the token through an HTTP redirect.
-        class NoRedirect(urllib.request.HTTPRedirectHandler):
-            def redirect_request(self, *args, **kwargs):
-                return None
+        # curl plutôt qu'urllib : le Python système (LibreSSL 2.8) ne parle pas TLS 1.3, exigé par o2switch.
+        # Token et corps passent par stdin (-K -) pour rester hors des arguments du processus.
+        # urlencode échappe guillemets et antislashs : le corps est sûr dans une chaîne de config curl.
+        body = urllib.parse.urlencode(params or {})
+        config = 'header = "Authorization: ' + self.authorization.replace('\\', '\\\\').replace('"', '\\"') + '"\n' + \
+                 'data = "' + body + '"\n'
         try:
-            with urllib.request.build_opener(NoRedirect).open(req, timeout=30) as response:
-                payload = json.load(response)
-        except urllib.error.HTTPError as e:
-            hint = ' (token expiré ou révoqué : relance configure)' if e.code in (401, 403) else ''
-            raise Error('Erreur HTTP cPanel ' + str(e.code) + hint) from None
-        except (urllib.error.URLError, TimeoutError, ValueError):
-            raise Error('Connexion cPanel ou réponse JSON invalide.') from None
+            p = subprocess.run(['curl', '-sS', '--proto', '=https', '--max-redirs', '0', '-m', '30', '-K', '-',
+                                '-w', '\n%{http_code}', self.base + module + '/' + function],
+                               input=config, capture_output=True, text=True, timeout=40)
+        except (OSError, subprocess.SubprocessError):
+            raise Error('curl introuvable ou bloqué.') from None
+        if p.returncode:
+            raise Error('Connexion cPanel impossible : ' + (p.stderr.strip().splitlines() or ['curl ' + str(p.returncode)])[-1])
+        text, _, code = p.stdout.rpartition('\n')
+        if code != '200':
+            hint = ' (token expiré ou révoqué : relance configure)' if code in ('401', '403') else ''
+            raise Error('Erreur HTTP cPanel ' + code + hint)
+        try:
+            payload = json.loads(text)
+        except ValueError:
+            raise Error('Réponse cPanel non JSON.') from None
         result = payload.get('result', payload)
         if result.get('status') != 1:
             raise Error('cPanel a refusé ' + module + '::' + function + ' : ' + '; '.join(result.get('errors') or ['raison inconnue']))
