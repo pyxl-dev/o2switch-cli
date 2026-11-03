@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 400" role="img" aria-label="o2switch-cli : piloter cPanel o2switch en ligne de commande">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#16408f"/>
+      <stop offset="1" stop-color="#0d2757"/>
+    </linearGradient>
+    <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2f86e8"/>
+      <stop offset="1" stop-color="#16408f"/>
+    </linearGradient>
+    <linearGradient id="unit" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".22"/>
+      <stop offset="1" stop-color="#fff" stop-opacity=".07"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="400" rx="24" fill="url(#bg)"/>
+  <g transform="translate(96 96) scale(.4)">
+    <rect width="512" height="512" rx="116" fill="url(#lg)" stroke="#fff" stroke-opacity=".25" stroke-width="8"/>
+    <g fill="url(#unit)" stroke="#fff" stroke-width="20">
+      <rect x="96" y="96" width="320" height="96" rx="28"/>
+      <rect x="96" y="214" width="320" height="96" rx="28"/>
+    </g>
+    <g fill="#fff">
+      <circle cx="158" cy="144" r="14"/><circle cx="158" cy="262" r="14"/>
+      <rect x="212" y="136" width="130" height="16" rx="8" opacity=".85"/>
+      <rect x="212" y="254" width="130" height="16" rx="8" opacity=".85"/>
+    </g>
+    <g fill="none" stroke="#fff" stroke-width="26" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M124 356l56 40-56 40"/><path d="M212 436h128"/>
+    </g>
+  </g>
+  <g font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" fill="#fff">
+    <text x="340" y="190" font-size="84" font-weight="700">o2switch-cli</text>
+    <text x="342" y="250" font-size="34" fill-opacity=".85">cPanel o2switch from the terminal</text>
+    <text x="342" y="300" font-size="26" fill-opacity=".6">DNS  /  mail  /  SSL  /  tokens  /  dry-run by default</text>
+  </g>
+</svg>
